@@ -1,7 +1,11 @@
 package com.emadyehya.eece451;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -55,17 +59,32 @@ public class MainActivity extends AppCompatActivity {
     //change_wifi sets the wifi to on or off based on the value of set
     private void change_wifi(boolean set){
 
-
         String toast_txt = "WiFi has been turned ";
         toast_txt += set? "on" : "off";
         Toast.makeText(context, toast_txt, Toast.LENGTH_SHORT).show();
+        WifiManager wifiManager = (WifiManager)this.context.getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(set);
+
+
     }
 
     private void change_bluetooth(boolean set) {
 
+
         String toast_txt = "Bluetooth has been turned ";
         toast_txt += set? "on" : "off";
         Toast.makeText(context, toast_txt, Toast.LENGTH_SHORT).show();
+
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        boolean isEnabled = bluetoothAdapter.isEnabled();
+        if (set && !isEnabled) {
+            bluetoothAdapter.enable();
+        }
+        else if(!set && isEnabled) {
+            bluetoothAdapter.disable();
+        }
+
+
 
     }
     //endregion
@@ -73,6 +92,15 @@ public class MainActivity extends AppCompatActivity {
     private void init(){
         //TODO: Ghazi, find the values of the below variables and fill them
         boolean wifi_status = false, bluetooth_status = false, cellular_status = false;
+        WifiManager wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
+        wifi_status = wifi.isWifiEnabled();
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        bluetooth_status =bluetoothAdapter != null && bluetoothAdapter.isEnabled();
+
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetworkInfo = cm.getActiveNetworkInfo();
+        cellular_status = activeNetworkInfo != null && activeNetworkInfo.isAvailable() && activeNetworkInfo.isConnected();
 
         //GHAZI code goes here
 
