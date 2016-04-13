@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
     //endregion
 
     private void init(){
-        //TODO: Ghazi, find the values of the below variables and fill them
+
         boolean wifi_status = false, bluetooth_status = false, cellular_status = false;
         WifiManager wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
         wifi_status = wifi.isWifiEnabled();
