@@ -33,35 +33,23 @@ public class DetectActivity extends AppCompatActivity {
         //
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("DO you want a nickname?");
+        builder.setTitle("Do you want a nickname?");
 
-// Set up the input
-        //final EditText input = new EditText(this);
-// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-      //  input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-       // builder.setView(input);
-
-// Set up the buttons
         builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-               // m_Text = input.getText().toString();
-                //dialog.dismiss();
                 NewDeviceNick();
                 Log.d("Displaythingngng",m_Text);
-
 
             }
         });
         builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //dialog.dismiss();
             }
         });
 
         builder.show();
-        Toast.makeText(context, m_Text, Toast.LENGTH_SHORT).show();
 
         return m_Text;
     }
@@ -70,13 +58,12 @@ public class DetectActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter Nickname");
 
-// Set up the input
+
         final EditText input = new EditText(this);
-// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
 
-// Set up the buttons
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

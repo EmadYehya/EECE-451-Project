@@ -15,6 +15,11 @@ public class Device {
 
     private boolean detected_in_cycle;
 
+    public boolean equals(Device d1) {
+        if (this.name.equals( d1.name))
+            return true;
+        return false;
+    }
 
     public Device(String MAC_address, String phone_number, String nickname){
         this.MAC_address = MAC_address;

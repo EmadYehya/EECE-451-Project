@@ -52,7 +52,7 @@ public class DeviceManager {
      * @param nickname
      */
     public void DeviceDetected(String MAC_address, String phone_number, String nickname){
-        //TODO: Ghazi:
+
         /**
          * Check if this device exists in previous. If it does:
          *                                  - Call NewDetectino(true) on that device
@@ -62,5 +62,27 @@ public class DeviceManager {
          *                                  - Add it to the end of pervious
          *                                  - Call NewDetection(false)
          */
+        Device d1;
+        d1 = new Device(MAC_address,phone_number,nickname);
+        //previous
+        for (int j = 0; j < previous.size(); j++) {
+            if (d1.equals(previous.get(j))) {
+                d1 = previous.get(j);
+                d1.NewDetection(true);
+                used.set(j, true);
+                return;
+            }
+        }
+
+
+
+        Device d2 = new Device (MAC_address, phone_number, nickname);
+        previous.add(d2);
+        d2.NewDetection(false);
+
+
+
+
+
     }
 }
