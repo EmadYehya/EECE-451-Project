@@ -3,7 +3,7 @@ package com.emadyehya.eece451;
 /**
  * Created by Emad Yehya on 4/9/2016.
  */
-public class Manager {
+public class    Manager {
     private static Manager _instance = null;
     public DeviceManager DM;
 

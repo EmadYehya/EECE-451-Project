@@ -59,13 +59,11 @@ public class MainActivity extends AppCompatActivity {
     //change_wifi sets the wifi to on or off based on the value of set
     private void change_wifi(boolean set){
 
+        WifiManager wifiManager = (WifiManager)this.context.getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(set);
         String toast_txt = "WiFi has been turned ";
         toast_txt += set? "on" : "off";
         Toast.makeText(context, toast_txt, Toast.LENGTH_SHORT).show();
-        WifiManager wifiManager = (WifiManager)this.context.getSystemService(Context.WIFI_SERVICE);
-        wifiManager.setWifiEnabled(set);
-
-
     }
 
     private void change_bluetooth(boolean set) {

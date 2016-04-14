@@ -1,5 +1,9 @@
 package com.emadyehya.eece451;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  * Created by Emad Yehya on 4/9/2016.
  */
@@ -15,6 +19,12 @@ public class Device {
 
     private boolean detected_in_cycle;
 
+    //region GETTERS
+    public String getMAC_address(){return name;}
+    public String getLast_detected_time(){return new SimpleDateFormat("KK:mm.ss a").format(new Date(last_detected_time));}
+    public String getNb_of_times_detected(){return String.valueOf(nb_of_times_detected);}
+    //endregion
+
     public boolean equals(Device d1) {
         if (this.name.equals( d1.name))
             return true;
@@ -26,8 +36,8 @@ public class Device {
         this.phone_number = phone_number;
         this.nickname = nickname;
 
-        nb_of_times_detected = 1;
-        last_detected_time = System.currentTimeMillis() % 1000;
+        nb_of_times_detected = 0;
+        last_detected_time = System.currentTimeMillis();
         detection_range = 0;
         total_detected_range = 0;
 
@@ -46,7 +56,7 @@ public class Device {
      */
     public void NewDetection(boolean was_previous){
         nb_of_times_detected++;
-        long curr_time = System.currentTimeMillis() % 1000;
+        long curr_time = System.currentTimeMillis();
         if(was_previous){
             total_detected_range += (curr_time - last_detected_time);
             detection_range += (curr_time - last_detected_time);
@@ -58,7 +68,7 @@ public class Device {
 
 
     public void NotDetected(){
-        long curr_time = System.currentTimeMillis() % 1000;
+        long curr_time = System.currentTimeMillis();
         total_detected_range += (curr_time - last_detected_time);
     }
 

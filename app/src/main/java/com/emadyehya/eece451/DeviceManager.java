@@ -1,5 +1,12 @@
 package com.emadyehya.eece451;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
+import android.text.InputType;
+import android.util.Log;
+import android.widget.EditText;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,11 +19,21 @@ public class DeviceManager {
     private List<Device> previous;
     private List<Device> old;
     private List<Boolean> used;
+    private Context context;
+
+    private boolean blocked = false;
+
+    String m_Text = ""; //exists because ghazi doesn't know how to write code...
+
 
     public DeviceManager(){
         previous = new ArrayList<Device>(); //list of devices detected in last session
         old = new ArrayList<Device>();      //list of devices detected in this session
         used = new ArrayList<Boolean>();    //used to check if old devices were redetected
+    }
+
+    public void SetContext(Context context){
+        this.context = context;
     }
 
     /**
@@ -52,7 +69,6 @@ public class DeviceManager {
      * @param nickname
      */
     public void DeviceDetected(String MAC_address, String phone_number, String nickname){
-
         /**
          * Check if this device exists in previous. If it does:
          *                                  - Call NewDetectino(true) on that device
@@ -74,15 +90,90 @@ public class DeviceManager {
             }
         }
 
+        for(int j = 0; j < old.size(); j++){
+            if(d1.equals(old.get(j))){
+                d1 = old.get(j);
+                d1.NewDetection(false);
+                old.remove(j);
+                previous.add(d1);
+                return;
+            }
+        }
 
+        blocked = true;
 
+//        nickname = NewUserDialog(MAC_address);
         Device d2 = new Device (MAC_address, phone_number, nickname);
         previous.add(d2);
         d2.NewDetection(false);
 
+    }
+
+    public ArrayList<Device> GetPrintList(){
+
+        ArrayList<Device> ret = new ArrayList<>();
+
+        //TODO: Emad, fix it so that it sorts before printing.
+        for(int i = 0; i < previous.size(); i++){
+            ret.add(previous.get(i));
+        }
+        for(int i = 0; i < old.size(); i++){
+            ret.add(old.get(i));
+        }
+        return ret;
+    }
+
+    //region DIALOGS
+    public String NewUserDialog (String MAC_address) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Do you want to add a nickname for " + MAC_address + "?");
+
+        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                NewDeviceNick();
+            }
+        });
+        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+
+        builder.show();
+
+        return m_Text;
+    }
+    public String NewDeviceNick () {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Enter Nickname");
 
 
+        final EditText input = new EditText(context);
 
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                m_Text = input.getText().toString();
+                Log.d("Displaythingngng", m_Text);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+
+        return m_Text;
 
     }
+    //endregion
+
 }
