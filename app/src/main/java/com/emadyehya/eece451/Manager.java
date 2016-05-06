@@ -6,6 +6,7 @@ package com.emadyehya.eece451;
 public class    Manager {
     private static Manager _instance = null;
     public DeviceManager DM;
+    public String MAC;
 
     protected Manager() {
         DM = new DeviceManager();

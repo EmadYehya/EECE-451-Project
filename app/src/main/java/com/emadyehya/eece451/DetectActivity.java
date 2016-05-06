@@ -1,42 +1,39 @@
 package com.emadyehya.eece451;
 
 import android.app.ProgressDialog;
-import android.content.IntentFilter;
-import android.graphics.Typeface;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
+import android.graphics.Typeface;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
-import android.os.Handler;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.text.InputType;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.Toast;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.Vector;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class DetectActivity extends AppCompatActivity  implements WifiP2pManager.PeerListListener {
 
     //region GLOBAL_VARIABLES
     private String m_Text = "";
     Context context;
-    private static int deviceNumber;
     private TableLayout table;
     Handler myHandler;
     DeviceManager DM;
@@ -47,14 +44,20 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
     private WifiP2pManager manager;
     private android.content.BroadcastReceiver receiver = null;
     ProgressDialog progressDialog = null;
-
-
+    String url = "http://emadyehya.com/init_session";
+    String url2 = "http://emadyehya.com/";
+    String response;
+    String testMacAddress;
+    String testTimes;
+    String testTimeConnected;
+    TableRow rowTitles;
     //endregion
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detect);
+        new IntializeSessionTask().execute();
 
         context = this;
         myHandler = new Handler();
@@ -70,14 +73,9 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
         table.setShrinkAllColumns(true);
         scrollView.addView(table);
 
-        TableRow rowTitles = new TableRow(this);
-        TableRow rowLows = new TableRow(this);
-        TableRow rowConditions = new TableRow(this);
-        rowConditions.setGravity(Gravity.CENTER);
-        TextView empty = new TextView(this);
+        rowTitles = new TableRow(this);
         TableRow.LayoutParams params = new TableRow.LayoutParams();
         params.span = 6;
-        rowTitles.addView(empty);
         TextView column1Title = new TextView(this);
         column1Title.setText("MAC Address");
         column1Title.setTypeface(Typeface.SERIF, Typeface.BOLD);
@@ -90,6 +88,14 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
         column3Title.setText("Nb of times detected");
         column3Title.setTypeface(Typeface.SERIF, Typeface.BOLD);
         rowTitles.addView(column3Title);
+        TextView column4Title = new TextView(this);
+        column4Title.setText("Detection Range");
+        column4Title.setTypeface(Typeface.SERIF, Typeface.BOLD);
+        rowTitles.addView(column4Title);
+        TextView column5Title = new TextView(this);
+        column5Title.setText("Total Detection Range");
+        column5Title.setTypeface(Typeface.SERIF, Typeface.BOLD);
+        rowTitles.addView(column5Title);
         table.addView(rowTitles);
         setContentView(scrollView);
         //endregion
@@ -103,7 +109,7 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
 
-//        myHandler.post(AttemptDiscover);
+        myHandler.post(AttemptDiscover);
 
 //        onInitiateDiscovery();
 
@@ -111,25 +117,17 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
 
         //TODO: for testing. To test table functionality.
         //to test wifi functionality, comment this and uncomment myHandler.post(AttemptDisvoer) above
-        TestDetect();
+        //TestDetect();
     }
 
     //region TABLE_FUNCTIONS
     public void addDevice(Device device) {
         TableRow rowNew = new TableRow(this);
 
-        TextView rowTitle = new TextView(this);
-        rowTitle.setText("Device " + deviceNumber);
-        rowTitle.setTypeface(Typeface.DEFAULT_BOLD);
-        rowNew.addView(rowTitle);
-
-        deviceNumber++;
-
         TextView rowItem1 = new TextView(this);
         rowItem1.setText(device.getMAC_address());
         rowItem1.setGravity(Gravity.CENTER_HORIZONTAL);
         rowNew.addView(rowItem1);
-
 
         TextView rowItem2 = new TextView(this);
         rowItem2.setText("" + device.getLast_detected_time());
@@ -140,6 +138,16 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
         rowItem3.setText("" + device.getNb_of_times_detected());
         rowItem3.setGravity(Gravity.CENTER_HORIZONTAL);
         rowNew.addView(rowItem3);
+
+        TextView rowItem4 = new TextView(this);
+        rowItem4.setText("" + device.getDetection_range());
+        rowItem4.setGravity(Gravity.CENTER_HORIZONTAL);
+        rowNew.addView(rowItem4);
+
+        TextView rowItem5 = new TextView(this);
+        rowItem5.setText("" + device.getTotal_detected_range());
+        rowItem5.setGravity(Gravity.CENTER_HORIZONTAL);
+        rowNew.addView(rowItem5);
 
         table.addView(rowNew);
     }
@@ -170,6 +178,7 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
     @Override
     public void onResume() {
         super.onResume();
+        manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         receiver = new BroadcastReceiver(manager, channel, this);
         registerReceiver(receiver, intentFilter);
     }
@@ -196,6 +205,7 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
 
     @Override
     public void onPeersAvailable(WifiP2pDeviceList peerList) {
+        //manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         // Out with the old, in with the new.
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
@@ -204,6 +214,8 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
         Log.e("Device", peerList.getDeviceList().toString());
         peers.addAll(peerList.getDeviceList());
         Log.d("Devices", peers.toString());
+
+
         DM.StartSession();
         for(int i = 0; i < peers.size(); i++){
             int dA_location = peers.get(i).toString().indexOf("deviceAddress");
@@ -214,8 +226,9 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
         ArrayList<Device> print = DM.GetPrintList();
 
         table.removeAllViews();
+        table.addView(rowTitles);
 
-        for(int i = 0; i < print.size(); i++){
+        for(int i = 0; i < print.size(); i++) {
             addDevice(print.get(i));
         }
 
@@ -260,4 +273,38 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
         }, 5000);
     }
     //endregion
+
+    private class IntializeSessionTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected void onPreExecute() {
+
+        }
+        @Override
+        protected String doInBackground(String... urls) {
+            // Creating service handler class instance
+            ServiceHandler sh = new ServiceHandler();
+            // Making a request to url and getting response
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+
+            WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+            WifiInfo info = manager.getConnectionInfo();
+            String mac_address = info.getMacAddress();
+            Manager.getInstance().MAC=mac_address;
+
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add (new BasicNameValuePair("mac", mac_address));
+            response = sh.makeServiceCall(url,ServiceHandler.POST,params);
+            return response;
+
+        }
+        protected void onPostExecute(String result) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

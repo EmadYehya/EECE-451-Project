@@ -1,7 +1,6 @@
 package com.emadyehya.eece451;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -23,7 +22,10 @@ public class Device {
     public String getMAC_address(){return name;}
     public String getLast_detected_time(){return new SimpleDateFormat("KK:mm.ss a").format(new Date(last_detected_time));}
     public String getNb_of_times_detected(){return String.valueOf(nb_of_times_detected);}
-    //endregion
+    public int getDetection_range() {return detection_range;}
+    public void setDetection_range(int detection_range) {this.detection_range = detection_range;}
+    public int getTotal_detected_range() {return total_detected_range;}
+    public void setTotal_detected_range(int total_detected_range) {this.total_detected_range = total_detected_range;}
 
     public boolean equals(Device d1) {
         if (this.name.equals( d1.name))

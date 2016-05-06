@@ -43,7 +43,7 @@ public class BroadcastReceiver extends android.content.BroadcastReceiver {
             // that.
 
             if (manager != null) {
-                Log.d("test2","test2");
+                Log.d("test2", "test2");
                 manager.requestPeers(channel, activity);
             }
 
