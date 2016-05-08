@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -23,8 +24,10 @@ import android.widget.Toast;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
@@ -32,12 +35,11 @@ import java.util.Vector;
 public class DetectActivity extends AppCompatActivity  implements WifiP2pManager.PeerListListener {
 
     //region GLOBAL_VARIABLES
-    private String m_Text = "";
     Context context;
     private TableLayout table;
     Handler myHandler;
     DeviceManager DM;
-
+    ArrayList<String> list = new ArrayList<String>();
     private List peers = new ArrayList();
     private final IntentFilter intentFilter = new IntentFilter();
     private WifiP2pManager.Channel channel;
@@ -45,11 +47,8 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
     private android.content.BroadcastReceiver receiver = null;
     ProgressDialog progressDialog = null;
     String url = "http://emadyehya.com/init_session";
-    String url2 = "http://emadyehya.com/";
+    String url2 = "http://emadyehya.com/testing";
     String response;
-    String testMacAddress;
-    String testTimes;
-    String testTimeConnected;
     TableRow rowTitles;
     //endregion
 
@@ -58,6 +57,7 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detect);
         new IntializeSessionTask().execute();
+        new AddDeviceInfoToServer().execute();
 
         context = this;
         myHandler = new Handler();
@@ -118,6 +118,14 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
         //TODO: for testing. To test table functionality.
         //to test wifi functionality, comment this and uncomment myHandler.post(AttemptDisvoer) above
         //TestDetect();
+        column1Title.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("Test","Touched");
+            }
+        });
+
+
     }
 
     //region TABLE_FUNCTIONS
@@ -285,12 +293,10 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
             ServiceHandler sh = new ServiceHandler();
             // Making a request to url and getting response
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-
             WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
             WifiInfo info = manager.getConnectionInfo();
             String mac_address = info.getMacAddress();
             Manager.getInstance().MAC=mac_address;
-
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add (new BasicNameValuePair("mac", mac_address));
             response = sh.makeServiceCall(url,ServiceHandler.POST,params);
@@ -304,6 +310,38 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+
+        }
+    }
+
+    private class AddDeviceInfoToServer extends AsyncTask<String, Void, String> {
+        @Override
+        protected void onPreExecute() {
+
+        }
+        @Override
+        protected String doInBackground(String... urls) {
+            // Creating service handler class instance
+            ServiceHandler sh = new ServiceHandler();
+            //The content of the array should be the the mac address, how many times, total time connected , the values below are for testing
+            String StringArray[] = { "8B", "5","20s" };
+            JSONArray JSONArray = new JSONArray(Arrays.asList(StringArray));
+            Log.d("Testinggg",JSONArray.toString());
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            //8B is the mac address (testing)
+            params.add (new BasicNameValuePair("mac", "8B"));
+            params.add (new BasicNameValuePair("data", JSONArray.toString()));
+            response = sh.makeServiceCall(url2,ServiceHandler.POST,params);
+            return response;
+        }
+        protected void onPostExecute(String result) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            Log.d("Testingg",result);
         }
     }
 
