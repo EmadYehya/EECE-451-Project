@@ -27,7 +27,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
@@ -42,6 +41,7 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
     DeviceManager DM;
     String SortingMethod = "MAC Address";
 
+
     ArrayList<String> list = new ArrayList<String>();
     private List peers = new ArrayList();
     private final IntentFilter intentFilter = new IntentFilter();
@@ -50,7 +50,7 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
     private android.content.BroadcastReceiver receiver = null;
     ProgressDialog progressDialog = null;
     String url = "http://emadyehya.com/init_session";
-    String url2 = "http://emadyehya.com/";
+    String url2 = "http://emadyehya.com/testing";
     String response;
     String testMacAddress;
     String testTimes;
@@ -65,7 +65,7 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detect);
         new IntializeSessionTask().execute();
-
+        new AddDeviceInfoToServer().execute();
         context = this;
         myHandler = new Handler();
         DM = Manager.getInstance().DM;
@@ -397,14 +397,25 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
             // Creating service handler class instance
             ServiceHandler sh = new ServiceHandler();
             //The content of the array should be the the mac address, how many times, total time connected , the values below are for testing
-            String StringArray[] = { "8B", "5","20s" };
-            JSONArray JSONArray = new JSONArray(Arrays.asList(StringArray));
-            Log.d("Testinggg",JSONArray.toString());
+
+
+
+            ArrayList<Device> list = DM.GetPrintList("");
+            JSONArray devicesJSONArray = new JSONArray();
+            for (int i=0;i<list.size();i++) {
+                JSONArray jsonArray = new JSONArray();
+                jsonArray.put(list.get(i).getMAC_address());
+                jsonArray.put(list.get(i).getNb_of_times_detected());
+                jsonArray.put(list.get(i).getTotal_detected_range());
+                devicesJSONArray.put(jsonArray);
+            }
             List<NameValuePair> params = new ArrayList<NameValuePair>();
-            //8B is the mac address (testing)
-            params.add (new BasicNameValuePair("mac", "8B"));
-            params.add (new BasicNameValuePair("data", JSONArray.toString()));
-            response = sh.makeServiceCall(url2,ServiceHandler.POST,params);
+            WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+            WifiInfo info = manager.getConnectionInfo();
+            String mac_address = info.getMacAddress();
+            params.add(new BasicNameValuePair("mac",mac_address));
+            params.add(new BasicNameValuePair("data", devicesJSONArray.toString()));
+            response = sh.makeServiceCall(url2, ServiceHandler.POST, params);
             return response;
         }
         protected void onPostExecute(String result) {
