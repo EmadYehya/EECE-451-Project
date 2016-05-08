@@ -6,8 +6,11 @@ import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.util.Log;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -102,24 +105,123 @@ public class DeviceManager {
 
         blocked = true;
 
-        nickname = NewUserDialog(MAC_address);
+        //nickname = NewUserDialog(MAC_address);
         Device d2 = new Device (MAC_address, phone_number, nickname);
         previous.add(d2);
         d2.NewDetection(false);
 
     }
 
-    public ArrayList<Device> GetPrintList(){
+    ///*
+    class compareFunction_Mac implements Comparator<Device> {
 
+        public int compare(Device d1, Device d2) {
+            //System.out.println();
+            //Log.d("", d1.getMAC_address() + " " + d2.getMAC_address() + " " +d1.getMAC_address().compareTo(d2.getMAC_address()));
+
+
+
+            return d1.getMAC_address().compareTo(d2.getMAC_address()) ;
+
+        }
+
+    }
+
+
+    class compareFunction_Times_Detected implements Comparator<Device> {
+
+        public int compare(Device d1, Device d2) {
+
+            return d1.getNb_of_times_detected().compareTo(d2.getNb_of_times_detected()) ;
+
+        }
+
+    }
+
+    class compareFunction_detection_range implements Comparator<Device> {
+
+        public int compare(Device d1, Device d2) {
+            return d1.getDetection_range() - d2.getDetection_range() ;
+
+        }
+    }
+
+
+    class compareFunction_last_time implements Comparator<Device> {
+
+        public int compare(Device d1, Device d2) {
+
+            return d1.getLast_detected_time().compareTo(d2.getLast_detected_time()) ;
+
+        }
+
+    }
+
+    class compareFunction_total_time implements Comparator<Device> {
+
+        public int compare(Device d1, Device d2) {
+
+            return d1.getTotal_detected_range() - d2.getTotal_detected_range() ;
+
+        }
+
+    }
+
+    //*/
+
+    public ArrayList<Device> GetPrintList(String S){
+
+        //String S = "MAC Address";
         ArrayList<Device> ret = new ArrayList<>();
 
         //TODO: Emad, fix it so that it sorts before printing.
         for(int i = 0; i < previous.size(); i++){
             ret.add(previous.get(i));
         }
-        for(int i = 0; i < old.size(); i++){
+        for(int i = 0; i < old.size(); i++) {
             ret.add(old.get(i));
         }
+
+        ///*
+        if(S.equals("MAC Address"))
+        {
+
+            Collections.sort(ret, new compareFunction_Mac());
+
+            //String S2= "A";
+        }
+
+
+
+        else if (S.equals("Total Detection Range"))
+        {
+
+            Collections.sort(ret, new compareFunction_total_time());
+        }
+
+
+        else if (S.equals("Detection Range"))
+        {
+
+            Collections.sort(ret, new compareFunction_detection_range());
+
+        }
+
+        else if(S.equals("Last detected time"))
+        {
+
+            Collections.sort(ret, new compareFunction_last_time());
+
+        }
+
+
+        else if (S.equals("Nb of times detected"))
+        {
+
+            Collections.sort(ret, new compareFunction_Times_Detected());
+
+        }
+        //*/
         return ret;
     }
 
