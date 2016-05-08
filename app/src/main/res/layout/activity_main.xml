@@ -67,6 +67,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="cellular"
         android:id="@+id/textView3"
+        android:layout_below="@+id/textView2"
         android:layout_alignTop="@+id/main_swtich_cell"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
@@ -91,8 +92,8 @@
         android:layout_below="@+id/main_btn_begin"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_toLeftOf="@+id/main_swtich_cell"
+        android:layout_toStartOf="@+id/main_swtich_cell" />
 
     <Button
         android:layout_width="wrap_content"
@@ -102,6 +103,16 @@
         android:layout_below="@+id/button2"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show Graph"
+        android:id="@+id/graph_button"
+        android:layout_above="@+id/button3"
+        android:layout_toRightOf="@+id/main_swtich_cell"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 

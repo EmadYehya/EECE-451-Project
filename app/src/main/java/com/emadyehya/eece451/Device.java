@@ -74,6 +74,13 @@ public class Device {
         total_detected_range += (curr_time - last_detected_time);
     }
 
+    public String toString() {
+        String s;
+        s ="Name " + name + " Mac_Address " + MAC_address + " Number " + phone_number + "Nick Name " + nickname;
+        return s;
+    }
+
+
 
 
 }

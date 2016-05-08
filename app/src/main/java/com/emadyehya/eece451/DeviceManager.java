@@ -102,7 +102,7 @@ public class DeviceManager {
 
         blocked = true;
 
-//        nickname = NewUserDialog(MAC_address);
+        nickname = NewUserDialog(MAC_address);
         Device d2 = new Device (MAC_address, phone_number, nickname);
         previous.add(d2);
         d2.NewDetection(false);
@@ -174,6 +174,21 @@ public class DeviceManager {
         return m_Text;
 
     }
+    public void DeviceDialog (Device d1) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        builder.setMessage(d1.toString());
+        builder.setTitle("Device Info");
+
+        builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+
+
+    }
+
     //endregion
 
 }

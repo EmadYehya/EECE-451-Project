@@ -32,6 +32,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".DetectActivity" />
+        <activity android:name=".GraphActivity" />
         <activity android:name=".ServerActivity" />
         <activity android:name=".OptionsActivity" >
         </activity>
