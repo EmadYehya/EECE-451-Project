@@ -50,7 +50,7 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
     private android.content.BroadcastReceiver receiver = null;
     ProgressDialog progressDialog = null;
     String url = "http://emadyehya.com/init_session";
-    String url2 = "http://emadyehya.com/testing";
+    String url2 = "http://emadyehya.com/new_data";
     String response;
     String testMacAddress;
     String testTimes;
@@ -64,8 +64,6 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detect);
-        new IntializeSessionTask().execute();
-        new AddDeviceInfoToServer().execute();
         context = this;
         myHandler = new Handler();
         DM = Manager.getInstance().DM;
@@ -312,6 +310,7 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
             addDevice(print.get(i));
         }
 
+        new AddDeviceInfoToServer().execute();
         myHandler.post(AttemptDiscover);
 
 //        onInitiateDiscovery();
@@ -354,38 +353,7 @@ public class DetectActivity extends AppCompatActivity  implements WifiP2pManager
     }
     //endregion
 
-    private class IntializeSessionTask extends AsyncTask<String, Void, String> {
-        @Override
-        protected void onPreExecute() {
 
-        }
-        @Override
-        protected String doInBackground(String... urls) {
-            // Creating service handler class instance
-            ServiceHandler sh = new ServiceHandler();
-            // Making a request to url and getting response
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-
-            WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-            WifiInfo info = manager.getConnectionInfo();
-            String mac_address = info.getMacAddress();
-            Manager.getInstance().MAC=mac_address;
-
-            List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add (new BasicNameValuePair("mac", mac_address));
-            response = sh.makeServiceCall(url,ServiceHandler.POST,params);
-            return response;
-
-        }
-        protected void onPostExecute(String result) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-    }
 
     private class AddDeviceInfoToServer extends AsyncTask<String, Void, String> {
         @Override

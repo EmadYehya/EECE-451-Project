@@ -2,11 +2,17 @@ package com.emadyehya.eece451;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +39,8 @@ public class DeviceManager {
         previous = new ArrayList<Device>(); //list of devices detected in last session
         old = new ArrayList<Device>();      //list of devices detected in this session
         used = new ArrayList<Boolean>();    //used to check if old devices were redetected
+        new IntializeSessionTask().execute();
+
     }
 
     public void SetContext(Context context){
@@ -293,4 +301,38 @@ public class DeviceManager {
 
     //endregion
 
+    private class IntializeSessionTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected void onPreExecute() {
+
+        }
+        @Override
+        protected String doInBackground(String... urls) {
+            String response;
+            String url = "http://emadyehya.com/init_session";
+            // Creating service handler class instance
+            ServiceHandler sh = new ServiceHandler();
+            // Making a request to url and getting response
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+
+            WifiManager manager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            WifiInfo info = manager.getConnectionInfo();
+            String mac_address = info.getMacAddress();
+            Manager.getInstance().MAC=mac_address;
+
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add (new BasicNameValuePair("mac", mac_address));
+            response = sh.makeServiceCall(url,ServiceHandler.POST,params);
+            return response;
+
+        }
+        protected void onPostExecute(String result) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
 }
