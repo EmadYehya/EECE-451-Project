@@ -10,6 +10,7 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     String url = "http://emadyehya.com/add_nb";
     int phone_number;
     String response;
+    String myPhoneNumber;
     //endregion
 
     @Override
@@ -40,6 +42,10 @@ public class MainActivity extends AppCompatActivity {
 
         //region INTILIZATIONS
         context = this;
+
+        TelephonyManager tm = (TelephonyManager)this.getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
+        myPhoneNumber =  tm.getLine1Number();
+//        Log.d("Phone",myPhoneNumber);
 
         ((Switch) findViewById(R.id.main_switch_wifi)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -75,40 +81,65 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button3).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // custom dialog
-                final Dialog dialog = new Dialog(context);
-                dialog.setContentView(R.layout.prompts);
-                //dialog.setTitle("Title...");
-                editTextDialogUserInput = (EditText) dialog.findViewById(R.id.editTextDialogUserInput);
+                //if (myPhoneNumber == null) {
+                    // custom dialog
+                    final Dialog dialog = new Dialog(context);
+                    dialog.setContentView(R.layout.prompts);
+                    //dialog.setTitle("Title...");
+                    editTextDialogUserInput = (EditText) dialog.findViewById(R.id.editTextDialogUserInput);
 
-                Button dialogButton = (Button) dialog.findViewById(R.id.button_ok);
-                // if button is clicked, close the custom dialog
-                dialogButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        try {
-                            phone_number = Integer.parseInt(editTextDialogUserInput.getText().toString());
-                            new SendPhoneNumber().execute();
-                        }
-                        catch(Exception E) {
+                    Button dialogButton = (Button) dialog.findViewById(R.id.button_ok);
+                    // if button is clicked, close the custom dialog
+                    dialogButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            try {
+                                phone_number = Integer.parseInt(editTextDialogUserInput.getText().toString());
+                                new SendPhoneNumber().execute();
+                            } catch (Exception E) {
+                                dialog.dismiss();
+                                final Dialog newDialog = new Dialog(context);
+                                newDialog.setContentView(R.layout.custom);
+                                Button button = (Button) newDialog.findViewById(R.id.button_ok);
+                                newDialog.show();
+                                button.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        newDialog.dismiss();
+                                    }
+                                });
+                            }
                             dialog.dismiss();
-                            final Dialog newDialog = new Dialog(context);
-                            newDialog.setContentView(R.layout.custom);
-                            Button button = (Button) newDialog.findViewById(R.id.button_ok);
-                            newDialog.show();
-                            button.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    newDialog.dismiss();
+                        }
+                    });
+
+                    dialog.show();
+                /*}
+                else {
+                    new SendPhoneNumber().execute();
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                            context);
+
+                    // set title
+                    alertDialogBuilder.setTitle("Registration successful");
+
+                    // set dialog message
+                    alertDialogBuilder
+                            .setMessage("Your number was retrieved")
+                            .setCancelable(false)
+                            .setNegativeButton("OK",new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,int id) {
+
                                 }
                             });
-                        }
-                        dialog.dismiss();
-                    }
-                });
+                    // create alert dialog
+                    AlertDialog alertDialog = alertDialogBuilder.create();
 
-                dialog.show();
+                    // show it
+                    alertDialog.show();
+                }*/
             }
+
         });
 
         init();
@@ -181,7 +212,12 @@ public class MainActivity extends AppCompatActivity {
             // Making a request to url and getting response
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
             List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add (new BasicNameValuePair("nb", "" + phone_number ));
+            if(myPhoneNumber==null) {
+                params.add(new BasicNameValuePair("nb", "" + phone_number));
+            }
+            else {
+                params.add(new BasicNameValuePair("nb", "" + myPhoneNumber));
+            }
             response = sh.makeServiceCall(url,ServiceHandler.POST,params);
             return response;
 
